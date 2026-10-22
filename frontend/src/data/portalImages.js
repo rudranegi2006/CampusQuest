@@ -1,24 +1,28 @@
-// SAMPLE portal images, used ONLY when a portal has no uploaded reference image.
-// Replace later with real photos: either upload them through the admin API (then this file is ignored),
-// or drop files into /public/portals/ and point the names below at them, e.g. "/portals/library.jpg".
-//
-// The defaults below are Amity Noida campus photos hot-linked from a third-party gallery
-// (collegechalo.com). They are placeholders only: they work while online, are not ours to
-// redistribute, and can disappear at any time.
-const GALLERY = "https://web-collegechalo.s3.ap-south-1.amazonaws.com/colleges/amity-university-noida/gallery";
-const PLACEHOLDERS = [1, 2, 3, 4, 5, 6].map((n) => `${GALLERY}/${n}.webp`);
+// Local territory photos, served from frontend/public/territories/.
+// Keyed by portal name (must match the `name` column in backend/db/seeds/001_portals_riddles.sql).
+// No internet fetching: if a portal isn't listed here, the app falls back to the image uploaded
+// through the admin API (image_url), and if there is none the image is simply omitted.
+const BASE = "/territories";
 
-// Per-portal overrides (by portal name). Anything not listed gets a stable placeholder.
 export const PORTAL_IMAGES = {
-  // "Library": "/portals/library.jpg",
+  "H Block Centre": `${BASE}/h-block-centre.png`,
+  "Helipad": `${BASE}/helipad.png`,
+  "Palm Court": `${BASE}/palm-court.png`,
+  "Sports Complex Room": `${BASE}/sports-complex-room.png`,
+  "N Block Coffee": `${BASE}/n-block-coffee.png`,
+  "Library": `${BASE}/library.png`,
+  "Gate No. 2": `${BASE}/gate-no-2.png`,
+  "I Block Mess": `${BASE}/i-block-mess.png`,
+  "Megabyte": `${BASE}/megabyte.png`,
+  "Rara's Food Truck": `${BASE}/raras-food-truck.png`,
+  "Arcadia Pickleball Court": `${BASE}/arcadia-pickleball-court.png`,
+  "Cafedia": `${BASE}/cafedia.png`,
+  "J2 Block Entrance": `${BASE}/j2-block-entrance.png`,
+  "Hidden Fruit Shop": `${BASE}/hidden-fruit-shop.png`,
+  "The Bank": `${BASE}/the-bank.png`,
 };
 
-function stableIndex(key, mod) {
-  let h = 0;
-  for (const ch of String(key)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return h % mod;
-}
-
-export function sampleImageFor(portal) {
-  return PORTAL_IMAGES[portal.name] || PLACEHOLDERS[stableIndex(portal.name ?? portal.id, PLACEHOLDERS.length)];
+/** Local image path for a portal, or null when we don't have one. */
+export function localImageFor(portal) {
+  return PORTAL_IMAGES[portal?.name] || null;
 }

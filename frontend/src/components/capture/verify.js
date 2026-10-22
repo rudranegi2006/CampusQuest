@@ -1,16 +1,16 @@
-export const ALLOWED_RANGE = 20; // meters
+export const ALLOWED_RANGE = 50; // meters
 export const MIN_SIMILARITY = 70; // percent
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-function haversine(a, b) {
+export function haversine(a, b) {
   const R = 6371000, rad = (d) => (d * Math.PI) / 180;
   const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-function portalCoordinates(portal) {
+export function portalCoordinates(portal) {
   if (portal?.coords?.lat != null && portal?.coords?.lng != null) return portal.coords;
   if (portal?.latitude != null && portal?.longitude != null) {
     return { lat: Number(portal.latitude), lng: Number(portal.longitude) };

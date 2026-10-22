@@ -68,3 +68,14 @@ button:active:not(:disabled) { transform: scale(0.97); }
 
 /* Presence layers ignore touches themselves; their content opts back in. */
 [data-anim] > * { pointer-events: auto; }
+
+
+/* Daily riddles card: animated border while today's riddles are unsolved */
+@keyframes riddle-glow {
+  0%, 100% { border-color: rgba(251, 191, 36, 0.35); box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.0), 0 0 6px rgba(251, 191, 36, 0.25); }
+  50%      { border-color: rgba(251, 191, 36, 1);    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.18), 0 0 18px rgba(251, 191, 36, 0.55); }
+}
+.riddle-pending { border-width: 2px; animation: riddle-glow 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .riddle-pending { animation: none; border-color: rgba(251, 191, 36, 1); }
+}

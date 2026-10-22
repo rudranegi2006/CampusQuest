@@ -1,5 +1,5 @@
 import { apiFetch, API_URL } from "./client.js";
-import { sampleImageFor } from "../data/portalImages.js";
+import { localImageFor } from "../data/portalImages.js";
 
 function relativeTime(value) {
   if (!value) return "";
@@ -45,8 +45,8 @@ function normalizePortal(portal) {
     owner,
     lvl: total,
     dist: "Nearby",
-    img: portal.image_url ? `${API_URL}${portal.image_url}` : sampleImageFor(portal),
-    img_is_sample: !portal.image_url,
+    img: localImageFor(portal) || (portal.image_url ? `${API_URL}${portal.image_url}` : null),
+    img_is_sample: false,
     xp: 0,
     capture: { done: total, total: 3 },
     resonators: portal.resonator_slots

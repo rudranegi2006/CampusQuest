@@ -6,7 +6,7 @@ export const NAV_ITEMS = [
   { id: "profile", label: "Profile", icon: "user" },
 ];
 
-export default function BottomNav({ view, onChange, accent, items = NAV_ITEMS, onScan }) {
+export default function BottomNav({ view, onChange, accent, items = NAV_ITEMS, onScan, scanEnabled = true }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-[#07080d]/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
       <div className="grid grid-cols-4 items-end">
@@ -31,8 +31,11 @@ export default function BottomNav({ view, onChange, accent, items = NAV_ITEMS, o
           <button
             aria-label="Scan"
             onClick={onScan}
-            className="-mr-5 -mt-12 grid h-20 w-20 place-items-center rounded-l-full rounded-tr-full border-2 bg-[#0b0d16]"
-            style={{ borderColor: accent, color: accent, boxShadow: `0 0 18px ${accent}88` }}
+            disabled={!scanEnabled}
+            className="-mr-5 -mt-12 grid h-20 w-20 place-items-center rounded-l-full rounded-tr-full border-2 bg-[#0b0d16] transition-colors disabled:cursor-not-allowed"
+            style={scanEnabled
+              ? { borderColor: accent, color: accent, boxShadow: `0 0 18px ${accent}88` }
+              : { borderColor: "#2a2e3d", color: "#4a4f60" }}
           >
             <Icon name="scan" size={30} />
           </button>

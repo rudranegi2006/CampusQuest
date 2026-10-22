@@ -17,6 +17,10 @@ import { teamAccent } from "../../theme.js";
 import { getCurrentEvent } from "../../api/event.js";
 import { getPortal, getPortals } from "../../api/portals.js";
 import { getActivity, getHeatmap } from "../../api/intel.js";
+import { getTodayRiddles } from "../../api/riddles.js";
+import { withAnswered } from "../riddle/answeredStore.js";
+import useUserLocation from "../map/useUserLocation.js";
+import { ALLOWED_RANGE, haversine, portalCoordinates } from "../capture/verify.js";
 
 export default function DashboardScreen() {
   const location = useLocation();
@@ -44,6 +48,10 @@ export default function DashboardScreen() {
     territories: true,
   });
 
+  // true while today's daily riddles still have unsolved ones (drives the highlight)
+  const [riddlesPending, setRiddlesPending] = useState(false);
+  const [resonators, setResonators] = useState(0); // available to deploy
+  const { position } = useUserLocation();
   const [event, setEvent] = useState(null);
   const [portals, setPortals] = useState([]);
   const [activity, setActivity] = useState([]);
@@ -82,6 +90,32 @@ export default function DashboardScreen() {
     };
   }, []);
 
+  // Refresh daily-riddle status on load and whenever the riddle flow closes.
+  useEffect(() => {
+    if (riddlesOpen || capturing) return;
+    let active = true;
+    getTodayRiddles()
+      .then((data) => {
+        const list = withAnswered(data);
+        if (!active) return;
+        setRiddlesPending(list.some((r) => !r.answered));
+        setResonators(data?.available_resonators ?? 0);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [riddlesOpen, capturing]);
+
+  // Nearest portal, and whether the player is within range of it.
+  const nearest = position
+    ? portals.reduce((best, p) => {
+        const c = portalCoordinates(p);
+        if (!c) return best;
+        const d = haversine({ lat: position.lat, lng: position.lng }, c);
+        return !best || d < best.d ? { portal: p, d } : best;
+      }, null)
+    : null;
+  const canScan = !!nearest && nearest.d <= ALLOWED_RANGE && resonators > 0;
+
   // Tapping the active tab again (other than Map) returns to the plain map.
   const onNav = (id) => {
     setView(id === view && id !== "map" ? "map" : id);
@@ -101,14 +135,17 @@ export default function DashboardScreen() {
 
   return (
     <main className="relative h-dvh overflow-hidden bg-ink text-white">
-      {/* Map is always mounted and full-screen. Everything else overlays it. */}
-      <div className="absolute inset-0">
+      {/* Map is always mounted and full-screen. Everything else overlays it.
+          z-0 makes this a stacking context, so the map's own floating buttons
+          (compass, locate-me: z-[100]) stay beneath the Intel/Profile screens. */}
+      <div className="absolute inset-0 z-0">
         <AmityMap
           portals={portals}
           heatmap={heatmap}
           onSelectPortal={openPortal}
           onSelectLocation={setRiddleLoc}
           solvedIds={solvedIds}
+          showControls={view === "map" && !selected && !capturing && !riddlesOpen && !riddleLoc}
         />
       </div>
 
@@ -119,7 +156,7 @@ export default function DashboardScreen() {
         <button
           type="button"
           onClick={() => setRiddlesOpen(true)}
-          className="absolute inset-x-2 top-[10rem] z-10 flex items-center gap-3 rounded-xl border border-white/10 bg-[#0b0d16]/95 p-3 text-left shadow-lg backdrop-blur"
+          className={`absolute inset-x-2 top-[10rem] z-10 flex items-center gap-3 rounded-xl border bg-[#0b0d16]/95 p-3 text-left shadow-lg backdrop-blur ${riddlesPending ? "riddle-pending" : "border-white/10"}`}
         >
           <span className="h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-white/10">
             <img
@@ -167,7 +204,8 @@ export default function DashboardScreen() {
         view={view}
         onChange={onNav}
         accent={accent}
-        onScan={() => portals[0] && setCapturing(portals[0])}
+        scanEnabled={canScan}
+        onScan={() => canScan && setCapturing(nearest.portal)}
       />
 
       {/* Portal details */}

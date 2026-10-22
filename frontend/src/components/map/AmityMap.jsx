@@ -95,7 +95,7 @@ function smoothHeading(current, target) {
  *  - onSelectLocation(loc): called when a location marker is tapped (replaces the popup)
  *  - solvedIds: location ids whose riddle is solved; their markers turn red
  */
-export default function AmityMap({ portals = [], onSelectPortal, onSelectLocation, solvedIds = [] }) {
+export default function AmityMap({ portals = [], onSelectPortal, onSelectLocation, solvedIds = [], showControls = true }) {
   const container = useRef(null);
 
   const mapRef = useRef(null);
@@ -761,7 +761,7 @@ export default function AmityMap({ portals = [], onSelectPortal, onSelectLocatio
       <div ref={container} className="h-full w-full" />
 
       {/* LOCATE ME BUTTON (only when the user is inside campus) */}
-      {userInside && (
+      {showControls && userInside && (
         <button
           type="button"
           onClick={locateMe}
@@ -776,8 +776,8 @@ export default function AmityMap({ portals = [], onSelectPortal, onSelectLocatio
         </button>
       )}
 
-      {/* COMPASS BUTTON */}
-      <button
+      {/* COMPASS BUTTON (map home screen only) */}
+      {showControls && <button
         type="button"
         onClick={toggleCompass}
         aria-label={compassEnabled ? "Disable compass" : "Enable compass"}
@@ -796,7 +796,7 @@ export default function AmityMap({ portals = [], onSelectPortal, onSelectLocatio
         >
           N
         </span>
-      </button>
+      </button>}
 
       {/* COORDINATES PANEL */}
       {/* <div className="absolute bottom-3 left-3 z-[100] max-w-[calc(100%-24px)] rounded-lg bg-[rgba(15,20,25,0.85)] px-3 py-2.5 font-sans text-sm text-white">

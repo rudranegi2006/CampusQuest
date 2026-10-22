@@ -1,6 +1,6 @@
 import { RED, BLUE, PURPLE } from "../theme.js";
 // Mock data. Replace with Firestore / API data.
-const IMG = "https://mockups-design.com/wp-content/uploads/2023/04/Free_Exhibition_Mockup_1.jpg";
+const IMG = "/territories/library.png";
 const DESC = "A landmark at the heart of the campus. A key strategic location with high visibility and value.";
 
 export const EVENT_END = Date.now() + (6 * 3600 + 24 * 60 + 17) * 1000;
