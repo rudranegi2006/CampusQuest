@@ -5,12 +5,12 @@ services:
     # Apply migrations + (idempotent) seed, then start with hot reload.
     command: sh -c "node scripts/migrate.js && node scripts/seed.js && npx nodemon --legacy-watch src/server.js"
     ports:
-      - "3000:3000"
+      - "4000:4000"
     env_file:
       - path: .env
         required: false
     environment:
-      PORT: 3000
+      PORT: 4000
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: campusquest
