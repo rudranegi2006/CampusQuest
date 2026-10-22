@@ -1,0 +1,5 @@
+# These supplied references are visibly problematic for the stated game labels.
+# Remove an entry only after manually reviewing and correcting the source dataset.
+H Block Centre/H_Block_Centre_01.jpg
+Bank/Bank_02.jpg
+Helipad/Helipad_05.jpg

@@ -1,0 +1,3 @@
+Put photos that are NOT any of the 15 places here: random campus corners, corridors, rooms, roads.
+Target: 30 or more. They teach the system to reject wrong photos.
+Target: 15 to 20 photos, from different sides and distances, on at least two different days.
