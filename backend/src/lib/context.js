@@ -86,6 +86,13 @@ export const today = () => campusParts().date;
 
 /** Writes an XP row, bumps users.xp, returns the new totals. Call inside the action's transaction. */
 export async function awardXp(client, { userId, eventId, faction, amount, reason, refId = null }) {
+  // xp_ledger.amount has CHECK (amount > 0), so a zero-XP reward (e.g. XP.RIDDLE_SOLVED = 0)
+  // must not write a row. Return the player's current totals instead.
+  if (!(amount > 0)) {
+    const { rows: cur } = await client.query('SELECT xp FROM users WHERE id = $1', [userId]);
+    const current = cur[0]?.xp ?? 0;
+    return { awarded: 0, total: current, level: levelInfo(current).level, leveled_up: false };
+  }
   await client.query(
     `INSERT INTO xp_ledger (user_id, event_id, faction, amount, reason, ref_id) VALUES ($1, $2, $3, $4, $5, $6)`,
     [userId, eventId, faction, amount, reason, refId]

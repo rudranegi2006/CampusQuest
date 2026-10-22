@@ -6,7 +6,7 @@ export default function PortalHero({ portal, accent, showDistance = false, class
   return (
     <div className={`relative overflow-hidden bg-gradient-to-br from-[#2a2f45] to-[#0c0e16] ${className}`}>
       {portal.img ? (
-        <img src={portal.img} alt="" className="h-full w-full object-cover" />
+        <img src={portal.img} alt="" className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
       ) : (
         <div className="absolute inset-0 grid place-items-center" style={{ background: `radial-gradient(circle at 50% 45%, ${accent}44, transparent 62%)` }}>
           <svg viewBox="0 0 200 200" className="absolute h-[85%] opacity-60" aria-hidden="true" style={{ color: accent }}>

@@ -65,7 +65,7 @@ export default function PortalDetail({ portal, accent, onBack, onNavigate }) {
       <div className="flex-1 overflow-y-auto pb-28">
         {/* hero */}
         <div className="relative h-[210px] bg-gradient-to-br from-[#3a3f55] to-[#14161f]">
-          {portal.img && <img src={portal.img} alt="" className="h-full w-full object-cover" />}
+          {portal.img && <img src={portal.img} alt="" className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
           <span className="absolute right-3 top-3 flex items-center gap-2 rounded-full border bg-[#0b0d16]/80 px-3 py-1.5 text-xs backdrop-blur" style={{ borderColor: o.color, color: o.color }}>
             <Icon name="tower" size={14} />{o.status}
           </span>

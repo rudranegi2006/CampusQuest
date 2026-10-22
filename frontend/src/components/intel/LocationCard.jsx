@@ -10,7 +10,7 @@ export default function LocationCard({ portal, onSelect }) {
       className="flex w-full overflow-hidden rounded-xl border border-white/10 bg-[#0b0d16] text-left active:brightness-125"
     >
       <div className="relative h-[92px] w-[150px] shrink-0 bg-gradient-to-br from-[#3a3f55] to-[#14161f]">
-        {portal.img && <img src={portal.img} alt="" className="h-full w-full object-cover" />}
+        {portal.img && <img src={portal.img} alt="" className="h-full w-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
         <span className="absolute left-1.5 top-1.5"><OwnerBadge owner={portal.owner} size={30} /></span>
       </div>
       <div className="flex flex-1 items-stretch justify-between p-3">

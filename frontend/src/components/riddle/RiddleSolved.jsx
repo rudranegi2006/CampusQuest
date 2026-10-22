@@ -35,9 +35,11 @@ export default function RiddleSolved({ accent, xp, resonator = 1, onBack, onCont
         <section className="mt-3 rounded-xl border border-white/10 bg-white/[0.03] p-3">
           <p className="text-sm font-semibold">Rewards</p>
           <div className="mt-3 space-y-3">
-            <p className="flex items-center gap-3 font-display text-xl font-bold" style={{ color: "#ffb020" }}>
-              <span className="grid h-11 w-11 place-items-center rounded-lg bg-[#ff7a1a]/25 text-xs font-black text-[#ff7a1a]">XP</span>+{xp} XP
-            </p>
+            {xp > 0 && (
+              <p className="flex items-center gap-3 font-display text-xl font-bold" style={{ color: "#ffb020" }}>
+                <span className="grid h-11 w-11 place-items-center rounded-lg bg-[#ff7a1a]/25 text-xs font-black text-[#ff7a1a]">XP</span>+{xp} XP
+              </p>
+            )}
             <p className="flex items-center gap-3 text-sm font-semibold">
               <span className="grid h-11 w-11 place-items-center rounded-lg border border-white/10 bg-white/5">×{resonator}</span>
               Resonator added to inventory
