@@ -1,8 +1,9 @@
 import PlayerCard from "./PlayerCard.jsx";
 import StatTiles from "./StatTiles.jsx";
+import LeaderboardPanel from "../leaderboard/LeaderboardPanel.jsx";
 import { OWNERS } from "../../theme.js";
 
-export default function PlayerProfile({ account, team, onOpenLeaderboard, onSettings }) {
+export default function PlayerProfile({ account, team, onSettings }) {
   const accent = OWNERS[team].color;
   const profile = account?.profile || {};
   const stats = account?.stats || {};
@@ -28,7 +29,9 @@ export default function PlayerProfile({ account, team, onOpenLeaderboard, onSett
       </header>
 
       <PlayerCard player={player} team={team} onEdit={() => console.log("TODO: edit profile")} />
-      <StatTiles stats={player.stats} rank={rank} onOpenLeaderboard={onOpenLeaderboard} />
+      <StatTiles stats={player.stats} rank={rank} />
+
+      <LeaderboardPanel accent={accent} />
     </div>
   );
 }

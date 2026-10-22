@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { StepTransition } from "../motion/PageTransition.jsx";
 import RiddleQuestion from "./RiddleQuestion.jsx";
 import RiddleSolved from "./RiddleSolved.jsx";
 import { answerRiddle, getTodayRiddles } from "../../api/riddles.js";
@@ -70,6 +71,7 @@ export default function RiddleFlow({ accent, onClose, onUpdated }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-[#05060b] text-white">
+      <StepTransition id={`${step}-${index}`} className="h-full">
       {step === "loading" && <div className="grid h-full place-items-center text-sm text-mute">Loading today's riddles…</div>}
 
       {step === "error" && (
@@ -119,6 +121,7 @@ export default function RiddleFlow({ accent, onClose, onUpdated }) {
           </div>
         </div>
       )}
+      </StepTransition>
     </div>
   );
 }

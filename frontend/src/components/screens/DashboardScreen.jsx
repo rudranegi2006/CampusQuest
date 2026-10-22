@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { useLocation } from "react-router-dom";
 
+import Presence from "../motion/Presence.jsx";
 import AmityMap from "../map/AmityMap.jsx";
 import ScoreBar from "../dashboard/ScoreBar.jsx";
 import BottomNav from "../dashboard/BottomNav.jsx";
@@ -11,7 +12,6 @@ import CaptureFlow from "../capture/CaptureFlow.jsx";
 import RiddleFlow from "../riddle/RiddleFlow.jsx";
 import useSolved from "../riddle/useSolved.js";
 import PlayerProfile from "../profile/PlayerProfile.jsx";
-import LeaderboardScreen from "../leaderboard/LeaderboardScreen.jsx";
 
 import { teamAccent } from "../../theme.js";
 import { getCurrentEvent } from "../../api/event.js";
@@ -32,7 +32,6 @@ export default function DashboardScreen() {
 
   const [view, setView] = useState("map"); // "map" | "intel" | "profile"
   const [selected, setSelected] = useState(null);
-  const [boardOpen, setBoardOpen] = useState(false);
   const [capturing, setCapturing] = useState(null);
 
   const [riddlesOpen, setRiddlesOpen] = useState(false);
@@ -141,7 +140,7 @@ export default function DashboardScreen() {
       )}
 
       {/* Intel */}
-      {view === "intel" && (
+      <Presence show={view === "intel"} anim="slide-up" className="z-10">
         <IntelPanel
           portals={portals}
           activity={activity}
@@ -150,19 +149,18 @@ export default function DashboardScreen() {
           layers={layers}
           onLayersChange={setLayers}
         />
-      )}
+      </Presence>
 
       {/* Profile */}
-      {view === "profile" && (
+      <Presence show={view === "profile"} anim="fade" className="z-[15]">
         <PlayerProfile
           account={account}
           team={team}
-          onOpenLeaderboard={() => setBoardOpen(true)}
           onSettings={() =>
             console.log("TODO: open settings / sign out")
           }
         />
-      )}
+      </Presence>
 
       {/* Bottom navigation */}
       <BottomNav
@@ -173,27 +171,19 @@ export default function DashboardScreen() {
       />
 
       {/* Portal details */}
-      {selected && (
-        <PortalDetail
+      <Presence show={!!selected} anim="slide-right" className="z-30">
+        {selected && <PortalDetail
           portal={selected}
           accent={accent}
           onBack={() => setSelected(null)}
           onNavigate={(p) =>
             console.log("TODO: start navigation to", p.name)
           }
-        />
-      )}
-
-      {/* Leaderboard */}
-      {boardOpen && (
-        <LeaderboardScreen
-          accent={accent}
-          onBack={() => setBoardOpen(false)}
-        />
-      )}
+        />}
+      </Presence>
 
       {/* Daily riddles button flow */}
-      {riddlesOpen && (
+      <Presence show={riddlesOpen} anim="slide-up" className="z-50">
         <RiddleFlow
           accent={accent}
           onClose={() => setRiddlesOpen(false)}
@@ -202,11 +192,11 @@ export default function DashboardScreen() {
             setRiddlesOpen(false);
           }}
         />
-      )}
+      </Presence>
 
       {/* Map/location riddle flow */}
-      {riddleLoc && (
-        <RiddleFlow
+      <Presence show={!!riddleLoc} anim="slide-up" className="z-50">
+        {riddleLoc && <RiddleFlow
           location={riddleLoc}
           accent={accent}
           solved={solvedIds.includes(riddleLoc.id)}
@@ -216,12 +206,12 @@ export default function DashboardScreen() {
             console.log("Captured via riddle flow", res);
             setRiddleLoc(null);
           }}
-        />
-      )}
+        />}
+      </Presence>
 
       {/* Portal capture */}
-      {capturing && (
-        <CaptureFlow
+      <Presence show={!!capturing} anim="slide-up" className="z-40">
+        {capturing && <CaptureFlow
           portal={capturing}
           accent={accent}
           onClose={() => setCapturing(null)}
@@ -229,8 +219,8 @@ export default function DashboardScreen() {
             console.log("Captured", res);
             setCapturing(null);
           }}
-        />
-      )}
+        />}
+      </Presence>
     </main>
   );
 }

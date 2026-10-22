@@ -22,3 +22,49 @@ body { margin: 0; background: var(--color-ink); font-family: var(--font-body); }
     var(--c, 14px) 100%, 0 calc(100% - var(--c, 14px)), 0 var(--c, 14px)
   );
 }
+
+/* ---------- Motion ----------
+   Subtle, GPU-friendly transitions (opacity + transform only).
+   Durations are tuned for a native-app feel; all disabled for reduced motion. */
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --dur-enter: 360ms;
+  --dur-exit: 220ms;
+}
+
+@keyframes page-in   { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes page-out  { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-6px); } }
+@keyframes fade-in   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-out  { from { opacity: 1; } to { opacity: 0; } }
+@keyframes slide-up-in  { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@keyframes slide-up-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(28px); } }
+@keyframes slide-right-in  { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: none; } }
+@keyframes slide-right-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(24px); } }
+@keyframes step-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+
+.anim-page       { animation: page-in var(--dur-enter) var(--ease-out) both; }
+.anim-fade       { animation: fade-in var(--dur-enter) var(--ease-out) both; }
+.anim-step       { animation: step-in var(--dur-enter) var(--ease-out) both; }
+
+[data-anim="fade"][data-state="enter"]       { animation: fade-in var(--dur-enter) var(--ease-out) both; }
+[data-anim="fade"][data-state="exit"]        { animation: fade-out var(--dur-exit) var(--ease-in) both; }
+[data-anim="slide-up"][data-state="enter"]   { animation: slide-up-in var(--dur-enter) var(--ease-out) both; }
+[data-anim="slide-up"][data-state="exit"]    { animation: slide-up-out var(--dur-exit) var(--ease-in) both; }
+[data-anim="slide-right"][data-state="enter"] { animation: slide-right-in var(--dur-enter) var(--ease-out) both; }
+[data-anim="slide-right"][data-state="exit"]  { animation: slide-right-out var(--dur-exit) var(--ease-in) both; }
+
+/* Press feedback for buttons */
+button { transition: transform 150ms var(--ease-out), opacity 150ms var(--ease-out); -webkit-tap-highlight-color: transparent; }
+button:active:not(:disabled) { transform: scale(0.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* Presence layers ignore touches themselves; their content opts back in. */
+[data-anim] > * { pointer-events: auto; }

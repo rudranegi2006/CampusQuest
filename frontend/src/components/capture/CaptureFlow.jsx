@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { StepTransition } from "../motion/PageTransition.jsx";
 import PortalBrief from "./PortalBrief.jsx";
 import CameraCapture from "./CameraCapture.jsx";
 import Verifying from "./Verifying.jsx";
@@ -13,6 +14,7 @@ export default function CaptureFlow({ portal, accent, availableResonators = 0, s
 
   return (
     <div className="fixed inset-0 z-40 bg-[#05060b] text-white">
+      <StepTransition id={step} className="h-full">
       {step === "brief" && (
         <PortalBrief portal={portal} accent={accent} onBack={onClose} onCapture={() => setStep("camera")} />
       )}
@@ -44,6 +46,7 @@ export default function CaptureFlow({ portal, accent, availableResonators = 0, s
           onConfirm={(deployment) => onComplete({ portalId: portal.id, photo, resonator: deployment.resonator, verification: result, deployment })}
         />
       )}
+      </StepTransition>
     </div>
   );
 }

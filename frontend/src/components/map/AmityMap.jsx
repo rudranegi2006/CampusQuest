@@ -4,6 +4,8 @@ import { Map as MapLibreMap, Marker, Popup } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import { LOCATIONS, ICONS } from "../../data/locations.js";
+import useUserLocation from "./useUserLocation.js";
+import { createUserMarker } from "./userMarker.js";
 
 const CENTER = [77.3336, 28.5445];
 
@@ -38,6 +40,21 @@ const EXCLUDED_POLYGON = [
   [77.333836, 28.545764],
   [77.334087, 28.545513],
 ];
+
+// Ray-casting point-in-polygon. Points/polygons are [lng, lat].
+function inPolygon([x, y], poly) {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i];
+    const [xj, yj] = poly[j];
+    if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+// Inside the campus polygon and not inside the excluded (shaded) cut-out.
+// To be more forgiving near the fence, add a tolerance here.
+const isInsideCampus = (pt) => inPolygon(pt, POLYGON) && !inPolygon(pt, EXCLUDED_POLYGON);
 
 async function copyText(text) {
   try {
@@ -102,6 +119,11 @@ export default function AmityMap({ portals = [], onSelectPortal, onSelectLocatio
   const [compassEnabled, setCompassEnabled] = useState(false);
   const [heading, setHeading] = useState(null);
   const [mapReady, setMapReady] = useState(false);
+
+  // Live user location (only drawn while the user is inside the campus area).
+  const { position } = useUserLocation();
+  const userMarkerRef = useRef(null);
+  const userInside = !!position && isInsideCampus([position.lng, position.lat]);
 
   const isMobileDevice = () => {
     if (typeof window === "undefined") return false;
@@ -674,6 +696,35 @@ export default function AmityMap({ portals = [], onSelectPortal, onSelectLocatio
     };
   }, [portals, mapReady]);
 
+  // "You are here" marker. Created after the fly-in; removed when the user leaves campus.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    if (!userMarkerRef.current) userMarkerRef.current = createUserMarker(map);
+
+    if (userInside) userMarkerRef.current.update(position);
+    else userMarkerRef.current.hide();
+  }, [position, userInside, mapReady]);
+
+  useEffect(
+    () => () => {
+      userMarkerRef.current?.remove();
+      userMarkerRef.current = null;
+    },
+    [],
+  );
+
+  const locateMe = () => {
+    if (!position || !userInside) return;
+    mapRef.current?.flyTo({
+      center: [position.lng, position.lat],
+      zoom: Math.max(mapRef.current.getZoom(), 17),
+      duration: 900,
+      essential: true,
+    });
+  };
+
   // Tint markers whose riddle is solved.
   const solvedKey = solvedIds.join(",");
   useEffect(() => {
@@ -708,6 +759,22 @@ export default function AmityMap({ portals = [], onSelectPortal, onSelectLocatio
     <div className="relative h-screen w-full">
       {/* MAP */}
       <div ref={container} className="h-full w-full" />
+
+      {/* LOCATE ME BUTTON (only when the user is inside campus) */}
+      {userInside && (
+        <button
+          type="button"
+          onClick={locateMe}
+          aria-label="Centre on my location"
+          title="Centre on my location"
+          className="absolute bottom-60 right-4 z-[100] flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border border-white/35 bg-[rgba(15,20,25,0.9)] p-0 text-white shadow-[0_4px_14px_rgba(0,0,0,0.35)] backdrop-blur-[8px]"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3.5" fill="#3b82f6" stroke="#fff" />
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+          </svg>
+        </button>
+      )}
 
       {/* COMPASS BUTTON */}
       <button

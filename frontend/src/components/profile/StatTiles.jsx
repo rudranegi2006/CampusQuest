@@ -12,13 +12,13 @@ function Tile({ icon, color, value, label, onClick }) {
   );
 }
 
-export default function StatTiles({ stats, rank, onOpenLeaderboard }) {
+export default function StatTiles({ stats, rank }) {
   return (
     <div className="mt-5 grid grid-cols-4 gap-2.5 px-4">
       <Tile icon="crystal" color={RED} value={stats.portals} label="Portals" />
       <Tile icon="link" color={BLUE} value={stats.links} label="Links" />
       <Tile icon="clip" color="#cbd5e1" value={stats.missions} label="Missions" />
-      <Tile icon="bars" color={RED} value={`#${rank}`} label="Global Rank" onClick={onOpenLeaderboard} />
+      <Tile icon="bars" color={RED} value={`#${rank}`} label="Global Rank" />
     </div>
   );
 }

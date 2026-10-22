@@ -10,6 +10,8 @@ import RequireAuth from "./components/auth/RequireAuth.jsx";
 import ProfileScreen from "./components/screens/ProfileScreen.jsx";
 import DashboardScreen from "./components/screens/DashboardScreen.jsx";
 
+import PageTransition from "./components/motion/PageTransition.jsx";
+
 import "./index.css";
 
 export default function App() {
@@ -27,6 +29,7 @@ export default function App() {
         ) : (
           <AuthProvider>
             <BrowserRouter>
+              <PageTransition>
               <Routes>
                 <Route path="/" element={<Navigate to="/login" replace />} />
 
@@ -61,6 +64,7 @@ export default function App() {
 
                 <Route path="*" element={<Navigate to="/login" replace />} />
               </Routes>
+              </PageTransition>
             </BrowserRouter>
           </AuthProvider>
         )}
