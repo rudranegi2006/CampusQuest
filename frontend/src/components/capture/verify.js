@@ -1,5 +1,5 @@
 export const ALLOWED_RANGE = 50; // meters
-export const MIN_SIMILARITY = 70; // percent
+export const MIN_SIMILARITY = 50; // percent
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

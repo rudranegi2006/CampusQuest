@@ -46,12 +46,13 @@ export default async function gameRoutes(app) {
   app.post('/portals/:id/verify', { ...auth, schema: { params: id } }, async (request) => {
     if (!request.isMultipart()) throw httpError(415, 'Send multipart/form-data with fields: photo, latitude, longitude');
     const fields = {};
-    let photo = null;
+    let photo = null, photoType = null;
     for await (const part of request.parts()) {
       if (part.type === 'file') {
         if (part.fieldname !== 'photo') { await part.toBuffer(); continue; }
         if (!/^image\/(jpeg|png|webp)$/.test(part.mimetype)) throw httpError(415, 'Photo must be JPEG, PNG or WebP');
         photo = await part.toBuffer();
+        photoType = part.mimetype;
       } else fields[part.fieldname] = part.value;
     }
     const latitude = Number(fields.latitude), longitude = Number(fields.longitude);
@@ -59,7 +60,7 @@ export default async function gameRoutes(app) {
     if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
       throw httpError(400, 'latitude and longitude are required');
     }
-    return verifyPortal(request.user.uid, request.params.id, { photo, latitude, longitude });
+    return verifyPortal(request.user.uid, request.params.id, { photo, photoType, latitude, longitude });
   });
 
   app.post('/portals/:id/deploy', { ...auth, schema: { params: id, body: { type: 'object', required: ['verification_id'], properties: { verification_id: { type: 'integer', minimum: 1 } } } } },

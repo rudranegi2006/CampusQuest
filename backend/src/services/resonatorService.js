@@ -1,7 +1,5 @@
 // Resonator inventory, location+photo verification, and deployment.
 import { createReadStream } from 'node:fs';
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 import { query, queryMany, withTransaction } from '../db/db.js';
 import { gameConfig } from '../config/game.js';
 import { env } from '../config/env.js';
@@ -10,7 +8,7 @@ import {
   getPlayer, requireOnboarded, requireLiveEvent, requirePortalOpen, getEventPortal,
   distanceTo, rangeFor, today, awardXp, logEvent, getCurrentEvent,
 } from '../lib/context.js';
-import { compareImages, matcherMode } from '../matcher/index.js';
+import { compareImages } from '../matcher/index.js';
 import { getActiveResonators, recalculatePortal, stateView } from './portalState.js';
 
 /** Derived, never stored: resonators earned this event (correct riddles) minus resonators deployed this event. */
@@ -41,11 +39,11 @@ export async function getMyResonators(uid) {
 
 /**
  * POST /portals/:id/verify  (multipart: photo + latitude + longitude)
- * Checks distance and compares the live photo with the portal's reference images.
+ * Checks distance and sends the live photo to the image-recognition service (best label must be this portal at >= IMAGE_MATCH_THRESHOLD).
  * Always answers 200 with details so the UI can show the result screen; a passed result
  * carries a single-use verification_id that POST /portals/:id/deploy consumes.
  */
-export async function verifyPortal(uid, portalId, { photo, latitude, longitude }) {
+export async function verifyPortal(uid, portalId, { photo, photoType, latitude, longitude }) {
   const player = await getPlayer(uid);
   requireOnboarded(player);
   const ev = await requireLiveEvent();
@@ -61,16 +59,12 @@ export async function verifyPortal(uid, portalId, { photo, latitude, longitude }
   const locationOk = distance <= range;
 
   let similarity = null;
+  let imageOk = false;
   if (locationOk) {                                     // skip the (expensive) matcher when too far away
-    const refs = await queryMany('SELECT id, file_path FROM portal_reference_images WHERE portal_id = $1 ORDER BY is_primary DESC, id', [portal.id]);
-    const references = [];
-    for (const r of refs) {
-      try { references.push({ id: r.id, buffer: await readFile(path.join(env.UPLOAD_DIR, r.file_path)) }); } catch { /* missing file: skip */ }
-    }
-    if (!references.length && matcherMode !== 'mock') throw httpError(409, 'This portal has no reference image yet. Ask an admin to add one');
-    similarity = (await compareImages({ photo, references })).similarity;
+    const m = await compareImages({ photo, contentType: photoType, portal });
+    similarity = m.similarity;
+    imageOk = m.matches && similarity >= gameConfig.IMAGE_MATCH_THRESHOLD;   // best guess must be THIS portal, at >= threshold
   }
-  const imageOk = similarity !== null && similarity >= gameConfig.IMAGE_MATCH_THRESHOLD;
   const passed = locationOk && imageOk;
 
   const { rows } = await query(

@@ -101,18 +101,25 @@ All except `/health` and `/portals/:id/image` need `Authorization: Bearer <Fireb
 | `GET/POST /admin/riddles` · `PATCH /admin/riddles/:id` | Riddles (answer is always the portal's name; only its hash is stored) |
 | `GET /admin/stats` | Player counts |
 
-**Reference images:** upload at least one photo per portal (the 14-15 seeded portals have none). Until then the matcher has nothing to compare against (in `http` mode verification returns 409; in `mock` mode it still works).
+**Reference images:** only used to display the portal's photo in the app. Image verification does not need them.
 
-## Image recognition (plug-in point)
-`IMAGE_MATCHER=mock` always returns `MATCHER_MOCK_SIMILARITY` (0.72). When your team's model is ready, run it as a service and set `IMAGE_MATCHER=http` + `IMAGE_MATCHER_URL`. The backend calls it only after the GPS check passes:
+## Image recognition
+`IMAGE_MATCHER=mock` always returns `MATCHER_MOCK_SIMILARITY` (0.72) for local dev and tests. For real verification set:
 
 ```
-POST IMAGE_MATCHER_URL
-{ "photo_base64": "...", "references": [ { "id": 3, "image_base64": "..." } ] }
-→ 200 { "similarity": 0.0-1.0, "reference_id": 3 }      // best match across the references
+IMAGE_MATCHER=http
+IMAGE_MATCHER_URL=https://campusquest-ml.samay15jan.com   # base URL, the backend calls /v1/predict
+IMAGE_MATCHER_TOKEN=<INFERENCE_API_TOKEN of the ML service>
 ```
-The pass mark is `IMAGE_MATCH_THRESHOLD` (default 0.70, matches the UI's "≥ 70%").
-Anti-fraud: the app should use live camera only (as in the design). The server does not store submitted photos.
+The backend calls it only after the GPS check passes, sending the raw photo:
+
+```
+POST {IMAGE_MATCHER_URL}/v1/predict      Authorization: Bearer <token>   Content-Type: image/jpeg|png|webp
+→ 200 { "predictedTerritory", "accepted", "similarity", "margin",
+        "predictions": [ { "label": "Library", "similarity": 0.62 }, ... ] }
+```
+**Pass rule:** the highest-similarity label must be the portal being captured (names are compared ignoring case, punctuation and a leading "The", so `Raras Foodtruck` = `Rara's Food Truck`) **and** its similarity must be >= `IMAGE_MATCH_THRESHOLD` (default 0.50, shown in the UI as "≥ 50%"). The ML service's own `accepted` flag is ignored. If the best guess is a different place, the reported similarity is that of this portal's label (0 when it is outside the top 3), so the result screen stays consistent.
+No reference images are needed for this mode. Anti-fraud: the app should use live camera only (as in the design). The server does not store submitted photos.
 
 ## Event lifecycle
 A scheduler (every 30 s) activates scheduled events, finalises ended ones (winner = higher event XP, tie = no winner; bonus to the winner's participants) and creates next week's event if none exists. You can also drive it manually through `/admin/events`.

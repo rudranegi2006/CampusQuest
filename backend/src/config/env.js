@@ -33,9 +33,10 @@ export const env = {
   PORTAL_WINDOWS: str(process.env.PORTAL_WINDOWS, '09:00-12:30,14:00-17:00'),
 
   IMAGE_MATCHER: str(process.env.IMAGE_MATCHER, 'mock'),
-  IMAGE_MATCHER_URL: str(process.env.IMAGE_MATCHER_URL),
+  IMAGE_MATCHER_URL: str(process.env.IMAGE_MATCHER_URL),       // base URL of the ML service (we call /v1/predict)
+  IMAGE_MATCHER_TOKEN: str(process.env.IMAGE_MATCHER_TOKEN),   // its INFERENCE_API_TOKEN (server-side only)
   MATCHER_MOCK_SIMILARITY: num(process.env.MATCHER_MOCK_SIMILARITY, 0.72),
-  IMAGE_MATCH_THRESHOLD: num(process.env.IMAGE_MATCH_THRESHOLD, 0.7),
+  IMAGE_MATCH_THRESHOLD: num(process.env.IMAGE_MATCH_THRESHOLD, 0.5),
   DEPLOY_RANGE_M: num(process.env.DEPLOY_RANGE_M),
   ATTACK_RANGE_M: num(process.env.ATTACK_RANGE_M),
 
