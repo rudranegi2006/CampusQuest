@@ -74,6 +74,7 @@ All except `/health` and `/portals/:id/image` need `Authorization: Bearer <Fireb
 | `GET /activity?limit=` | Live-activity feed (deploy / destroy / capture / lost) |
 | `GET /heatmap?hours=24` | Per-portal `{red, blue, intensity 0..1}` for the heatmap layer |
 | `GET /leaderboard?scope=global\|red\|blue&period=event\|all&limit=` | `{entries[], me}` ranked by event XP (`event`) or lifetime XP (`all`) |
+| `GET /public/dashboard` | **No auth.** Read-only snapshot for the desktop big-screen dashboard: `event`, `scores`, `seconds_remaining`, `portals[]` (no per-player flags), `leaderboard {red[5], blue[5]}`, `activity[8]`. Cached ~4 s server-side. |
 
 ### Riddles (left-side popup)
 | | |
